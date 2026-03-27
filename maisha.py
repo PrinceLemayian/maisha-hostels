@@ -90,3 +90,53 @@ class Room:
             f"{self.status().upper()} | Occupants: {occupant_names} |"
             f"Rent per student: KES {self.rent_per_student():,}"
         )
+
+
+class Hostel:
+    def __init__(self, name):
+        self.name = name
+        self.rooms = {}
+        self.students = {}
+
+    def add_room(self, room):
+        self.rooms[room.room_number] = room
+
+    def add_student(self, student):
+        self.students[student.registration_number] = student
+
+    def get_room(self, room_number):
+        return self.rooms.get(room_number)
+
+    def get_student(self, registration_number):
+        return self.students.get(registration_number)
+
+    # Rent calculations
+
+    def calculate_charges(self, student, room):
+        charges = {}
+
+        # Security deposit for only first room assignment
+
+        if not student.assigned_before:
+            charges["Security Deposit"] = 3000
+
+        # Caution fee for every time a student moves to a different room
+
+        if student.previous_room is None or student.previous_room != room:
+            charges["Caution Fee"] = 500
+
+        # Fixed charges every semester
+
+        charges["Utility Levy"] = 1500
+        charges["Amenity Fee"] = 800
+
+        # Room rent
+        # Adding the student temporarily to get the correct rent split
+        room.occupants.append(student)
+        charges["Room Rent"] = room.rent_per_student()
+
+        # Bill the student
+        total = sum(charges.values())
+        student.total_charged += total
+
+        return charges
