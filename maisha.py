@@ -164,7 +164,7 @@ class Hostel:
         if student.current_room is not None:
             return (
                 False,
-                f"Rejected: {student.name} has already occupied a room.",
+                f"Rejected: {student.name} has already occupied a room. Vacate first.",
                 None,
             )
 
@@ -213,7 +213,7 @@ class Hostel:
             f"Success: {student.name} assigned to Room {room.room_number}.",
             charges,
         )
-    
+
     # Online booking by student
     def book_room(self, student, room):
         print(f"\n | ONLINE BOOKING | {student.name}: Room {room.room_number}")
@@ -244,20 +244,43 @@ class Hostel:
         room.occupants.remove(student)
         student.current_room = None
 
-        print(d"\n | VACATE | {student.name} has vacated Room {room.room_number}.")
+        print(f"\n | VACATE | {student.name} has vacated Room {room.room_number}.")
 
         # Recalculate rent after one student leaves
         if len(room.occupants) == 1:
             remaining = room.occupants[0]
             remaining.total_billed += 5000
-            print(f"{student.name} is the only occupant of Room {room.room_number} hence rent is recalculated to KES 10,000.")
+            print(
+                f"{student.name} is the only occupant of Room {room.room_number} hence rent is recalculated to KES 10,000."
+            )
 
         print(f"Room {room.room_number} is now: {room.status().upper()}")
         return True
 
     # Payments
-    
+
     def record_payment(self, student, amount):
         student.total_paid += amount
-        print(f"| PAYMENT | KES {amount:,} recorded for {student.name}. Outstanding balance is KES {student.outstanding_balance():,.0f}")
+        print(
+            f"| PAYMENT | KES {amount:,} recorded for {student.name}. Outstanding balance is KES {student.outstanding_balance():,.0f}"
+        )
 
+    # Decommissioning
+
+    def decommission_room(self, room):
+        print(f"Decommission Room {room.room_number}")
+
+        displaced = list(room.occupants)
+        for student in displaced:
+            room.occupants.remove(student)
+            student.current_room = None
+            print(f"{student.name} is now displaced, kindly reaallocate a room.")
+
+        room.is_decommissioned = True
+        print(f"Room {room.room_number} is now decommissioned.")
+
+    def print_charges(self, charges):
+        print("==| CHARGES |==")
+        for item, amount in charges.items():
+            print(f"{item:} KES {amount:,}")
+            print(f"{'Total':} KES {sum(charges.values()):,}")
