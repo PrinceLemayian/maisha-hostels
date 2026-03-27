@@ -137,6 +137,79 @@ class Hostel:
 
         # Bill the student
         total = sum(charges.values())
-        student.total_charged += total
+        student.total_billed += total
 
         return charges
+
+        # Room assignment
+
+    def assign_room(self, student, room):
+
+        # Check status of student
+        if student.status == "suspended":
+            return (
+                False,
+                f"Rejected: {student.name} has been suspended hence cannot be allocated a room.",
+                None,
+            )
+
+        if student.status == "graduated":
+            return (
+                False,
+                f"Rejected: {student.name} has graduated hence cannot be allocated a room.",
+                None,
+            )
+
+        # Check if student already has a room
+        if student.current_room is not None:
+            return (
+                False,
+                f"Rejected: {student.name} has already occupied a room.",
+                None,
+            )
+
+        # Check if room is decommissioned
+        if room.is_decommissioned:
+            return (
+                False,
+                f"Rejected: Room {room.room_number} has been decommissioned.",
+                None,
+            )
+
+        # Check gender policy
+        if room.allowed_gender() != student.gender:
+            return (
+                False,
+                f"Rejected: Floor {room.floor} is for {room.allowed_gender()} only.",
+                None,
+            )
+
+        # Check if room is full
+        if room.is_full():
+            return (
+                False,
+                f"Rejected: Room {room.room_number} is full (maximum 2 occupants).",
+                None,
+            )
+
+        # Check if genders match
+        if room.has_occupant() and room.existing_occupant_gender() != student.gender:
+            return (
+                False,
+                f"Rejected: Room {room.room_number} already has a {room.existing_occupant_gender()} occupant. {student.name} is {student.gender}.",
+                None,
+            )
+
+        # After all checks pass (calculate charges and append student to room)
+        charges = self.calculate_charges(student, room)
+
+        # Update the state of the student
+        student.current_room = room
+        student.previous_room = room
+        student.assigned_before = True
+
+        return (
+            True,
+            f"Success: {student.name} assigned to Room {room.room_number}.",
+            charges,
+        )
