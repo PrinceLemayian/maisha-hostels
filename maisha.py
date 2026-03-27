@@ -213,3 +213,51 @@ class Hostel:
             f"Success: {student.name} assigned to Room {room.room_number}.",
             charges,
         )
+    
+    # Online booking by student
+    def book_room(self, student, room):
+        print(f"\n | ONLINE BOOKING | {student.name}: Room {room.room_number}")
+        success, message, charges = self.assign_room(student, room)
+        print(message)
+        if success and charges:
+            self.print_charges(charges)
+        return success
+
+    # Manual allocation by warden
+    def allocate_room(self, student, room):
+        print(f"\n | WARDEN ASSIGNMENT | {student.name}: Room {room.room_number}")
+        success, message, charges = self.assign_room(student, room)
+        print(message)
+        if success and charges:
+            self.print_charges(charges)
+        return success
+
+    def vacate_room(self, student):
+        # Remove a student from the current room
+        if student.current_room is None:
+            print(f"\n{student.name} is not currently assigned to any room.")
+            return False
+
+        room = student.current_room
+
+        # Remove student from room
+        room.occupants.remove(student)
+        student.current_room = None
+
+        print(d"\n | VACATE | {student.name} has vacated Room {room.room_number}.")
+
+        # Recalculate rent after one student leaves
+        if len(room.occupants) == 1:
+            remaining = room.occupants[0]
+            remaining.total_billed += 5000
+            print(f"{student.name} is the only occupant of Room {room.room_number} hence rent is recalculated to KES 10,000.")
+
+        print(f"Room {room.room_number} is now: {room.status().upper()}")
+        return True
+
+    # Payments
+    
+    def record_payment(self, student, amount):
+        student.total_paid += amount
+        print(f"| PAYMENT | KES {amount:,} recorded for {student.name}. Outstanding balance is KES {student.outstanding_balance():,.0f}")
+
